@@ -10,3 +10,4 @@ class Book(models.Model):
     text_review_count = models.IntegerField(("text review count"))
     publication_date = models.DateField(("publication date"), auto_now=True)
     publisher = models.CharField(("publisher"), max_length=150)
+

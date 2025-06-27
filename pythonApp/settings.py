@@ -29,7 +29,7 @@ DEBUG = False
 ALLOWED_HOSTS = ['dvt.up.railway.app']
 
 if not DEBUG:
-    CSRF_TRUSTED_ORIGINS = ['https://dvt.up.railway.app/']
+    CSRF_TRUSTED_ORIGINS = ['https://*.dvt.up.railway.app', 'https://*.127.0.0.1']
 
 # Application definition
 

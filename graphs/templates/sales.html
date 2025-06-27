@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Goodread Books Dataset</title>
+    <title>Retail Sales Dataset</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.min.js" integrity="sha384-0pUGZvbkm6XF6gxjEnlmuGrJXVbNuzT9qBBavbLwCsOGabYfZo0T0to5eqruptLy" crossorigin="anonymous"></script>  
@@ -28,7 +28,10 @@
 </script>
 
 <script>
+
 const ctx = document.getElementById('myChart');
+
+
 
 //Extracting SQL data passed by render context argument, injected by above script tag
 const dataElement = document.getElementById('my-data');
@@ -51,27 +54,27 @@ function titleMaker(str){
                 padding: 10 }
                 }
     return Title}
-//Setup to allow programmatic changing of charts
-var i = 0;
+            
 
+//Setup to allow programmatic changing of data extraction
+var i = 0;
+var months = ["January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+            ],
+//initializing first chart on page load
 myChart = new Chart(ctx, {
         type: 'bar',
         data: {
-        labels: myData["graph_labels0"],
+        labels: months,
         datasets: [{
-            label: 'Number of books',
+            label: 'Total revenue',
             data: myData["graph_data0"],
             borderWidth: 1
         }]
         },
         options: {
-        plugins: titleMaker("Top Ten Authors by Number of Published Books"),
         maintainAspectRatio: false,
-        scales: {
-            y: {
-            beginAtZero: true
-            }
-        }
+        plugins: titleMaker("Total revenue by month"),
         }
     });
 
@@ -79,21 +82,23 @@ document.getElementById("body").addEventListener("click", function(){
     i += 1
     var chartLabels = "graph_labels" + i.toString();
     var  chartData = "graph_data" + i.toString();
+    var chartType = "type" + i.toString()
     var indicator = document.getElementById("indicator" + i.toString())
     if(i==0){
         myChart.destroy()
         myChart = new Chart(ctx, {
-        type: 'bar',
+        type: myData[chartType],
         data: {
-        labels: myData[chartLabels],
+        labels: months,
         datasets: [{
-            label: 'Number of published books',
+            label: "Total revenue",
             data: myData[chartData],
             borderWidth: 1
         }]
         },
         options: {
-        plugins: titleMaker("Top Ten Authors by Number of Published Books"),
+        plugins: titleMaker("Total Revenue per Month"),
+        
         maintainAspectRatio: false,
         scales: {
             y: {
@@ -105,22 +110,22 @@ document.getElementById("body").addEventListener("click", function(){
         
         document.getElementById("indicator2").classList.remove("bg-info")
         }
+
+
     else if (i==1){
         myChart.destroy()
         myChart = new Chart(ctx,{
-            type: 'line',
+            type: myData[chartType],
             data: {
                 labels: myData[chartLabels],
                 datasets: [{
-                label: 'Average rating',
+                label: "Revenue",
                 data: myData[chartData],
-                fill: false,
-                borderColor: 'rgb(75, 192, 192)',
-                tension: 0.1
+                hoverOffset: 5,
                 }],},
             options: {
-                plugins: titleMaker("Average Book Rating per Number of Pages"),
-                maintainAspectRatio: false
+                maintainAspectRatio: false,
+                plugins: titleMaker("Revenue Contribution by Category"),
             }
             })
         
@@ -130,39 +135,25 @@ document.getElementById("body").addEventListener("click", function(){
         document.getElementById("indicator1").classList.remove("bg-info")
         myChart.destroy()
         myChart = new Chart(ctx, {
-            type: 'radar',
+            type: "line",
             data: {
-                labels: [
-                    '# of Books',
-                    'Average Rating',
-                    'Average Pages/Book(in hundreds)',
-                    '# of Ratings(in millions)',
-                    '# of Text Reviews(in ten-thousands)'
-                ],
+                labels: months,
                 datasets: [{
-                    label: myData[chartLabels][0],
+                    label: "Male",
                     data: myData[chartData][0],
-                    fill: true,
-                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                    borderColor: 'rgb(255, 99, 132)',
-                    pointBackgroundColor: 'rgb(255, 99, 132)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(255, 99, 132)'
+                    fill: false,
+                    borderColor: 'rgb(192, 75, 75)',
+                    tension: 0.1
                 }, {
-                    label: myData[chartLabels][1],
+                    label: "Female",
                     data: myData[chartData][1],
-                    fill: true,
-                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                    borderColor: 'rgb(54, 162, 235)',
-                    pointBackgroundColor: 'rgb(54, 162, 235)',
-                    pointBorderColor: '#fff',
-                    pointHoverBackgroundColor: '#fff',
-                    pointHoverBorderColor: 'rgb(54, 162, 235)'
+                    fill: false,
+                    borderColor: 'rgb(75, 192, 192)',
+                    tension: 0.1
                 }]
                 },
             options: {
-                plugins: titleMaker("Author Comparison: King vs Tolkien"),
+                plugins: titleMaker("Revenue per Month by Gender"),
                 maintainAspectRatio: false,
                 elements: {
                 line: {

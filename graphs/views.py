@@ -3,6 +3,39 @@ import sqlite3
 import json
 from django.http import HttpRequest
 
+
+#helper function to build chart based on type kwarg
+#kwarg skip used for data compression, skips number of rows = skip
+def chart(cur, context, query, i,  **kwargs):
+    type = kwargs.get("type", None)
+    skip = kwargs.get("skip", None)
+    if type and (type == "bar" or type == "line" or type == "pie" or type == "doughtnut"):
+        cur.execute(query)
+        graph_labels = []
+        graph_data = []
+        #Declaring empty list to place row data in
+        
+        if skip == None:
+            for row in cur.fetchall():
+                graph_labels.append(row[0])
+                graph_data.append(row[1])
+                
+        else:
+            for i in range(len(cur.fetchall())):
+                graph_labels.append(cur.fetchall()[i][0])
+                graph_data.append(cur.fetchall()[i][1])
+                i =+ skip
+
+        #Reformat lists of rows as values in a dictionary
+        context_type = "type" + str(i)
+        context_label = "graph_labels" + str(i)
+        context_data = "graph_data" + str(i)
+        context[context_type] = type    
+        context[context_label] = graph_labels
+        context[context_data] = graph_data
+        return context
+
+
 def graphs(request):
     
 
@@ -14,19 +47,13 @@ def graphs(request):
         data = request.POST.__getitem__("dataset")
         
         context={}
-        if data == "book":
-            cur.execute("SELECT count(authors), authors FROM graphs_book group by authors order by count() desc limit 10")
-            graph_labels0 = []
-            graph_data0 = []
-            #Declaring empty list to place row data in
-            
-            for row in cur.fetchall():
-                graph_data0.append(row[0])
-                graph_labels0.append(row[1])
 
-            #Reformat lists of rows as values in a dictionary    
-            context["graph_labels0"] = graph_labels0
-            context["graph_data0"] = graph_data0
+        if data == "book":
+            query = "SELECT authors, count(authors) FROM graphs_book group by authors order by count() desc limit 10"
+            i = 0
+            context = chart(cur, context, query, i, type="bar")
+            i = 1
+            #context = chart(cur,context,query,i,type="line",skip="")
 
             #line graph, generating avgs for ratings per range of 100 books, increments of 25
             graph_labels1 = []
@@ -49,7 +76,7 @@ def graphs(request):
             
             
             #Function to build helper list and append it to graph_data
-            def builder():
+            def author_radial_builder():
                 data_list = []
                 fetch = cur.fetchone()
                 for i in range(len(fetch)):
@@ -69,15 +96,47 @@ def graphs(request):
                 graph_data2.append(data_list)
             
             cur.execute('SELECT authors, count(authors), avg(average_rating), avg(num_pages), sum(ratings_count), sum(text_review_count) FROM graphs_book where authors = "J.R.R. Tolkien"')
-            builder()
+            author_radial_builder()
             cur.execute('SELECT authors, count(authors), avg(average_rating), avg(num_pages), sum(ratings_count), sum(text_review_count) FROM graphs_book where authors = "Stephen King"')
-            builder()
+            author_radial_builder()
             context["graph_labels2"] = graph_labels2
             context["graph_data2"] = graph_data2
 
             con.close()
             #Render template, passing context dict with row data through context arg
             return render(request, "books.html", {"json_data":json.dumps(context)})
+        
+        
+        elif data == "sale":
+            i = 0
+            query = "SELECT strftime('%m', date) as month, sum(total) as total from graphs_sale group by month order by month"
+            context = chart(cur, context, query, i, type="line")
+            i = 1
+            query = "select category, sum(total) as total from graphs_sale group by category order by total"
+            context = chart(cur, context, query, i, type="pie")
+            i = 2
+            query = "SELECT strftime('%m', date) as month, sum(total) as total, gender from graphs_sale group by month, gender order by month"
+            
+            #custom multi-line graph
+            cur.execute(query)
+            fetch = cur.fetchall()
+            data_list1 = []
+            data_list2 = []
+            j = 0
+            for row in fetch:
+                if j % 2 != 0:
+                    data_list1.append(row[1])
+                else:
+                    data_list2.append(row[1])
+                j += 1
+            graph_data2 = []
+            graph_data2.append(data_list1)
+            graph_data2.append(data_list2)
+            context["graph_data2"] = graph_data2
+            con.close()
+            return render(request, "sales.html", {"json_data":json.dumps(context)})
+        else:
+            return render(request, "dash.html")
         
     else:
         return render(request, "dash.html")

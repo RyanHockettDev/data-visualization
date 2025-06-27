@@ -11,3 +11,10 @@ class Book(models.Model):
     publication_date = models.DateField(("publication date"), auto_now=True)
     publisher = models.CharField(("publisher"), max_length=150)
 
+class Sale(models.Model):
+    date = models.DateField("Date", auto_now=True)
+    gender = models.CharField("Gender", max_length=12)
+    age = models.IntegerField("Age")
+    category = models.CharField("Product Category", max_length=30)
+    price = models.IntegerField("Price per Unit")
+    total = models.IntegerField("Total Amount")

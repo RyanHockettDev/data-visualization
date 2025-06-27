@@ -28,6 +28,8 @@ DEBUG = False
 
 ALLOWED_HOSTS = ['dvt.up.railway.app']
 
+if not DEBUG:
+    CSRF_TRUSTED_ORIGINS = ['dvt.up.railway.app']
 
 # Application definition
 
